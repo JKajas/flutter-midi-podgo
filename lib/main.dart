@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,6 +8,9 @@ import 'package:flutter_midi_command/flutter_midi_command.dart';
 import 'package:flutter_midi_command/flutter_midi_command_messages.dart';
 
 void main() => runApp(const MyApp());
+
+var darkMode = false;
+var globalFontSize = 35;
 
 class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -215,7 +217,8 @@ class ControllerPage extends State<Controller> {
                               Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: TextFormField(
-                                  style: const TextStyle(fontSize: 35),
+                                  style: TextStyle(
+                                      fontSize: globalFontSize.toDouble()),
                                   decoration: InputDecoration(
                                       labelText: "Nazwa",
                                       hintText: button.buttonName),
@@ -235,7 +238,7 @@ class ControllerPage extends State<Controller> {
                               Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: ElevatedButton(
-                                  child: const Text('Submit'),
+                                  child: const Text('Zatwierdź'),
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
                                       _formKey.currentState!.save();
@@ -256,7 +259,8 @@ class ControllerPage extends State<Controller> {
         button.button.send();
       },
       style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-      child: Text(button.buttonName, style: const TextStyle(fontSize: 35)),
+      child: Text(button.buttonName,
+          style: TextStyle(fontSize: globalFontSize.toDouble())),
     );
   }
 
@@ -310,7 +314,8 @@ class ControllerPage extends State<Controller> {
                               Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: TextFormField(
-                                  style: const TextStyle(fontSize: 35),
+                                  style: TextStyle(
+                                      fontSize: globalFontSize.toDouble()),
                                   decoration: InputDecoration(
                                       labelText: "Wartosc tempa",
                                       hintText: button.buttonVal.toString()),
@@ -334,7 +339,8 @@ class ControllerPage extends State<Controller> {
                               Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: TextFormField(
-                                  style: const TextStyle(fontSize: 35),
+                                  style: TextStyle(
+                                      fontSize: globalFontSize.toDouble()),
                                   decoration: InputDecoration(
                                       labelText: "Nazwa",
                                       hintText: button.buttonName),
@@ -354,7 +360,7 @@ class ControllerPage extends State<Controller> {
                               Padding(
                                 padding: const EdgeInsets.all(8),
                                 child: ElevatedButton(
-                                  child: const Text('Submit'),
+                                  child: const Text('Zatwierdź'),
                                   onPressed: () {
                                     if (_formKey.currentState!.validate()) {
                                       _formKey.currentState!.save();
@@ -378,23 +384,107 @@ class ControllerPage extends State<Controller> {
         sleep(duration);
         button.button.send();
       },
-      child: Text(button.buttonName, style: const TextStyle(fontSize: 35)),
+      child: Text(button.buttonName,
+          style: TextStyle(fontSize: globalFontSize.toDouble())),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Zapisane'),
-        ),
-        body: SingleChildScrollView(
-          child: Column(children: <Widget>[
-            GridView.count(
+      appBar: AppBar(
+        title: const Text('Zapisane'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.font_download, color: Colors.white),
+            onPressed: () {
+              showDialog<void>(
+                  context: context,
+                  builder: (context) =>
+                      StatefulBuilder(builder: (context, state) {
+                        return AlertDialog(
+                          content: Stack(
+                            clipBehavior: Clip.none,
+                            children: <Widget>[
+                              Positioned(
+                                right: -40,
+                                top: -40,
+                                child: InkResponse(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const CircleAvatar(
+                                    backgroundColor: Colors.red,
+                                    child: Icon(Icons.close),
+                                  ),
+                                ),
+                              ),
+                              Form(
+                                key: _formKey,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: TextFormField(
+                                        style: TextStyle(
+                                            fontSize:
+                                                globalFontSize.toDouble()),
+                                        decoration: InputDecoration(
+                                            labelText: "Wielkość czcionki",
+                                            hintText:
+                                                globalFontSize.toString()),
+                                        keyboardType: TextInputType.number,
+                                        onSaved: (String? value) {
+                                          if (value != null &&
+                                              value.isNotEmpty) {
+                                            setState(() async {
+                                              globalFontSize = int.parse(value);
+                                              final SharedPreferences prefs =
+                                                  await _prefs;
+                                              prefs.setInt("font_size",
+                                                  int.parse(value));
+                                            });
+                                          }
+                                        },
+                                        inputFormatters: <TextInputFormatter>[
+                                          FilteringTextInputFormatter.digitsOnly
+                                        ],
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8),
+                                      child: ElevatedButton(
+                                        child: const Text('Zatwierdź'),
+                                        onPressed: () {
+                                          if (_formKey.currentState!
+                                              .validate()) {
+                                            _formKey.currentState!.save();
+                                            Navigator.pop(context);
+                                          }
+                                        },
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }));
+            },
+          ),
+        ],
+      ),
+      body: Column(children: <Widget>[
+        Expanded(
+            flex: 85,
+            child: GridView.count(
+                childAspectRatio: MediaQuery.of(context).size.width /
+                    (MediaQuery.of(context).size.height / 2.15),
                 primary: false,
                 padding: const EdgeInsets.only(
-                    left: 20, right: 20, top: 10, bottom: 5),
-                shrinkWrap: true,
+                    left: 20, right: 20, top: 7, bottom: 5),
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 crossAxisCount: 3,
@@ -414,11 +504,15 @@ class ControllerPage extends State<Controller> {
                   createTempoButton(buttonSeventeenth),
                   createTempoButton(buttonEighteenth),
                   createTempoButton(buttonNineteenth),
-                ]),
-            GridView.count(
+                ])),
+        Expanded(
+            flex: 15,
+            child: GridView.count(
+                childAspectRatio: MediaQuery.of(context).size.width /
+                    (MediaQuery.of(context).size.height / 2.1),
                 primary: false,
-                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
-                shrinkWrap: true,
+                padding: const EdgeInsets.only(
+                    bottom: 10, left: 20, right: 20, top: 10),
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 crossAxisCount: 4,
@@ -427,20 +521,25 @@ class ControllerPage extends State<Controller> {
                   createSnapshotButton(buttonThirteenth),
                   createSnapshotButton(buttonFourteenth),
                   createSnapshotButton(buttonFifteenth),
-                ])
-          ]),
-        ));
+                ]))
+      ]),
+    );
   }
 }
 
 class MyAppState extends State<MyApp> {
   StreamSubscription<String>? _setupSubscription;
   final MidiCommand _midiCommand = MidiCommand();
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  final _formKey = GlobalKey<FormState>();
 
   @override
-  void initState() {
+  void initState() async {
     super.initState();
-
+    final SharedPreferences prefs = await _prefs;
+    globalFontSize = prefs.getInt("font_size") ?? 35;
+    darkMode = prefs.getBool("dark_mode") ?? true;
+    setState(() {});
     _setupSubscription = _midiCommand.onMidiSetupChanged?.listen((data) async {
       setState(() {});
     });
@@ -468,10 +567,23 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(scaffoldBackgroundColor: Colors.black),
+      theme: ThemeData(
+          scaffoldBackgroundColor: darkMode ? Colors.black : Colors.white),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('MidiUsb'),
+          actions: [
+            Switch(
+              value: darkMode,
+              onChanged: (newValue) async {
+                setState(() {
+                  darkMode = newValue;
+                });
+                final SharedPreferences prefs = await _prefs;
+                prefs.setBool("dark_mode", newValue);
+              },
+            )
+          ],
         ),
         body: Center(
           child: FutureBuilder(
@@ -485,16 +597,16 @@ class MyAppState extends State<MyApp> {
                     MidiDevice device = devices[index];
 
                     return ListTile(
-                      iconColor: Colors.white,
+                      iconColor: darkMode ? Colors.white : Colors.black,
                       title: Text(
                         device.name,
                         style: Theme.of(context)
                             .textTheme
-                            .apply(bodyColor: Colors.white)
+                            .apply(
+                                bodyColor:
+                                    darkMode ? Colors.white : Colors.black)
                             .headlineSmall,
                       ),
-                      subtitle: Text(
-                          "ins:${device.inputPorts.length} outs:${device.outputPorts.length}, ${device.id}, ${device.type}"),
                       leading: Icon(device.connected
                           ? Icons.radio_button_on
                           : Icons.radio_button_off),
