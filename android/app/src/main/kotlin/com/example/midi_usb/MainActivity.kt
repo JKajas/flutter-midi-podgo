@@ -1,4 +1,4 @@
-package com.example.midi_usb
+package com.example.flutter_midi_podgo
 
 import io.flutter.embedding.android.FlutterActivity
 

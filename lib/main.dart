@@ -571,7 +571,7 @@ class MyAppState extends State<MyApp> {
           scaffoldBackgroundColor: darkMode ? Colors.black : Colors.white),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('MidiUsb'),
+          title: const Text('Flutter-midi-podgo'),
           actions: [
             Switch(
               value: darkMode,

@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.midi_usb">
    <application
-        android:label="midi_usb"
+        android:label="flutter-midi-podgo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
