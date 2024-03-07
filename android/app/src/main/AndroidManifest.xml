@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.midi_usb">
+    package="com.example.flutter_midi_podgo">
    <application
         android:label="flutter-midi-podgo"
         android:name="${applicationName}"

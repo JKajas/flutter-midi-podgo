@@ -29,7 +29,7 @@ class ButtonMeta {
   ButtonMeta(this.buttonName, this.button, this.buttonVal,
       this.storageButtonVal, this.storageButtonName);
   void initButton(SharedPreferences prefs) {
-    buttonVal = prefs.getInt(storageButtonVal) ?? 0;
+    buttonVal = prefs.getInt(storageButtonVal) ?? 20;
     buttonName = prefs.getString(storageButtonName) ?? buttonName;
   }
 }
@@ -42,147 +42,170 @@ class Controller extends StatefulWidget {
 
 class ControllerPage extends State<Controller> {
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  bool isConnected = false;
+
   final _formKey = GlobalKey<FormState>();
-  double val = 0;
+  double val = 20;
   final ButtonMeta buttonFirst = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       "first_value",
       "first_name");
   final ButtonMeta buttonSecond = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       "second_value",
       "second_name");
   final ButtonMeta buttonThird = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'third_value',
       'third_name');
   final ButtonMeta buttonFourth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'fourth_value',
       'fourth_name');
   final ButtonMeta buttonFifth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'fifth_value',
       'fifth_name');
   final ButtonMeta buttonSixth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'sixth_value',
       'sixth_name');
   final ButtonMeta buttonSeventh = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'seventh_value',
       'seventh_name');
   final ButtonMeta buttonEighth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'eighth_value',
       'eighth_name');
   final ButtonMeta buttonNineth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'nineth_value',
       'nineth_name');
   final ButtonMeta buttonTenth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'tenth_value',
       'tenth_name');
   final ButtonMeta buttonEleventh = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'eleventh_value',
       'eleventh_name');
   final ButtonMeta buttonTwelfth = ButtonMeta(
       "1",
       CCMessage(channel: 0, controller: 69, value: 0),
-      0,
+      20,
       'twelfth_value',
       'twelfth_name');
   final ButtonMeta buttonThirteenth = ButtonMeta(
       "2",
       CCMessage(channel: 0, controller: 69, value: 1),
-      0,
+      20,
       'thirteenth_value',
       'thirteenth_name');
   final ButtonMeta buttonFourteenth = ButtonMeta(
       "3",
       CCMessage(channel: 0, controller: 69, value: 2),
-      0,
+      20,
       'fourteenth_value',
       'fourteenth_name');
   final ButtonMeta buttonFifteenth = ButtonMeta(
       "4",
       CCMessage(channel: 0, controller: 69, value: 3),
-      0,
+      20,
       'fifteenth_value',
       'fifteenth_name');
   final ButtonMeta buttonSixteenth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'sixteenth_value',
       'sixteenth_name');
   final ButtonMeta buttonSeventeenth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'seventeenth_value',
       'seventeenth_name');
   final ButtonMeta buttonEighteenth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'eighteenth_value',
       'eighteenth_name');
   final ButtonMeta buttonNineteenth = ButtonMeta(
       "Brak",
       CCMessage(channel: 0, controller: 64, value: 64),
-      0,
+      20,
       'nineteenth_value',
       'nineteenth_name');
+  StreamSubscription<String>? _setupSubscription;
+  final MidiCommand _midiCommand = MidiCommand();
+  MidiDevice? _midiDevice;
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
-    final SharedPreferences prefs = await _prefs;
-    setState(() {
-      buttonFirst.initButton(prefs);
-      buttonSecond.initButton(prefs);
-      buttonThird.initButton(prefs);
-      buttonFourth.initButton(prefs);
-      buttonFifth.initButton(prefs);
-      buttonSixth.initButton(prefs);
-      buttonSeventh.initButton(prefs);
-      buttonEighth.initButton(prefs);
-      buttonNineth.initButton(prefs);
-      buttonTenth.initButton(prefs);
-      buttonEleventh.initButton(prefs);
-      buttonTwelfth.initButton(prefs);
-      buttonThirteenth.initButton(prefs);
-      buttonFourteenth.initButton(prefs);
-      buttonFifteenth.initButton(prefs);
-      buttonSixteenth.initButton(prefs);
-      buttonSeventeenth.initButton(prefs);
-      buttonEighteenth.initButton(prefs);
-      buttonNineteenth.initButton(prefs);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _postInit();
+    });
+    _setupSubscription = _midiCommand.onMidiSetupChanged?.listen((data) async {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _setupSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _postInit() async {
+    await _prefs.then((prefs) {
+      setState(() {
+        buttonFirst.initButton(prefs);
+        buttonSecond.initButton(prefs);
+        buttonThird.initButton(prefs);
+        buttonFourth.initButton(prefs);
+        buttonFifth.initButton(prefs);
+        buttonSixth.initButton(prefs);
+        buttonSeventh.initButton(prefs);
+        buttonEighth.initButton(prefs);
+        buttonNineth.initButton(prefs);
+        buttonTenth.initButton(prefs);
+        buttonEleventh.initButton(prefs);
+        buttonTwelfth.initButton(prefs);
+        buttonThirteenth.initButton(prefs);
+        buttonFourteenth.initButton(prefs);
+        buttonFifteenth.initButton(prefs);
+        buttonSixteenth.initButton(prefs);
+        buttonSeventeenth.initButton(prefs);
+        buttonEighteenth.initButton(prefs);
+        buttonNineteenth.initButton(prefs);
+        globalFontSize = prefs.getInt("font_size") ?? 35;
+        darkMode = prefs.getBool("dark_mode") ?? true;
+      });
     });
   }
 
@@ -222,14 +245,13 @@ class ControllerPage extends State<Controller> {
                                   decoration: InputDecoration(
                                       labelText: "Nazwa",
                                       hintText: button.buttonName),
-                                  onSaved: (String? value) {
+                                  onSaved: (String? value) async {
                                     if (value != null && value.isNotEmpty) {
                                       button.buttonName = value;
-                                      setState(() async {
-                                        final SharedPreferences prefs =
-                                            await _prefs;
+                                      await _prefs.then((prefs) {
                                         prefs.setString(
                                             button.storageButtonName, value);
+                                        setState(() {});
                                       });
                                     }
                                   },
@@ -255,7 +277,7 @@ class ControllerPage extends State<Controller> {
                   );
                 }));
       },
-      onPressed: () {
+      onPressed: () async {
         button.button.send();
       },
       style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
@@ -300,13 +322,12 @@ class ControllerPage extends State<Controller> {
                                   max: 240,
                                   divisions: 220,
                                   label: button.buttonVal.toString(),
-                                  onChanged: (double value) {
-                                    state(() async {
+                                  onChanged: (double value) async {
+                                    await _prefs.then((prefs) {
                                       button.buttonVal = value.round();
-                                      final SharedPreferences prefs =
-                                          await _prefs;
                                       prefs.setInt(button.storageButtonVal,
                                           value.round());
+                                      state(() {});
                                     });
                                   },
                                 ),
@@ -320,14 +341,13 @@ class ControllerPage extends State<Controller> {
                                       labelText: "Wartosc tempa",
                                       hintText: button.buttonVal.toString()),
                                   keyboardType: TextInputType.number,
-                                  onSaved: (String? value) {
+                                  onSaved: (String? value) async {
                                     if (value != null && value.isNotEmpty) {
-                                      setState(() async {
+                                      await _prefs.then((prefs) {
                                         button.buttonVal = int.parse(value);
-                                        final SharedPreferences prefs =
-                                            await _prefs;
                                         prefs.setInt(button.storageButtonVal,
                                             int.parse(value));
+                                        setState(() {});
                                       });
                                     }
                                   },
@@ -344,14 +364,13 @@ class ControllerPage extends State<Controller> {
                                   decoration: InputDecoration(
                                       labelText: "Nazwa",
                                       hintText: button.buttonName),
-                                  onSaved: (String? value) {
+                                  onSaved: (String? value) async {
                                     if (value != null && value.isNotEmpty) {
                                       button.buttonName = value;
-                                      setState(() async {
-                                        final SharedPreferences prefs =
-                                            await _prefs;
+                                      await _prefs.then((prefs) {
                                         prefs.setString(
                                             button.storageButtonName, value);
+                                        setState(() {});
                                       });
                                     }
                                   },
@@ -377,11 +396,11 @@ class ControllerPage extends State<Controller> {
                   );
                 }));
       },
-      onPressed: () {
+      onPressed: () async {
         var durationVal = 60000 / button.buttonVal;
         var duration = Duration(milliseconds: durationVal.round() - 5);
         button.button.send();
-        sleep(duration);
+        await Future.delayed(duration);
         button.button.send();
       },
       child: Text(button.buttonName,
@@ -389,12 +408,49 @@ class ControllerPage extends State<Controller> {
     );
   }
 
+  void connectDevice(MidiDevice device) async {
+    await _midiCommand.connectToDevice(device).then((_) {
+      isConnected = true;
+      setState(() {});
+    });
+  }
+
+  void disconnectDevice(MidiDevice device) async {
+    _midiCommand.disconnectDevice(device);
+    isConnected = false;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: darkMode ? Colors.black : Colors.white,
       appBar: AppBar(
-        title: const Text('Zapisane'),
+        title: const Text('Midi podgo'),
         actions: [
+          FutureBuilder(
+              future: _midiCommand.devices,
+              builder: (BuildContext context, AsyncSnapshot snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  var devices = snapshot.data as List<MidiDevice>;
+                  return Checkbox(
+                      tristate: true,
+                      value: devices.isEmpty ? null : isConnected,
+                      onChanged: devices.isEmpty
+                          ? null
+                          : (bool? value) {
+                              MidiDevice device = devices[0];
+                              if (value == false || value == null) {
+                                disconnectDevice(device);
+                              } else {
+                                connectDevice(device);
+                              }
+                            });
+                } else {
+                  return const Checkbox(
+                      value: null, onChanged: null, tristate: true);
+                }
+              }),
           IconButton(
             icon: const Icon(Icons.font_download, color: Colors.white),
             onPressed: () {
@@ -435,15 +491,14 @@ class ControllerPage extends State<Controller> {
                                             hintText:
                                                 globalFontSize.toString()),
                                         keyboardType: TextInputType.number,
-                                        onSaved: (String? value) {
+                                        onSaved: (String? value) async {
                                           if (value != null &&
                                               value.isNotEmpty) {
-                                            setState(() async {
+                                            await _prefs.then((prefs) {
                                               globalFontSize = int.parse(value);
-                                              final SharedPreferences prefs =
-                                                  await _prefs;
                                               prefs.setInt("font_size",
                                                   int.parse(value));
+                                              setState(() {});
                                             });
                                           }
                                         },
@@ -474,6 +529,16 @@ class ControllerPage extends State<Controller> {
                       }));
             },
           ),
+          Switch(
+            value: darkMode,
+            onChanged: (newValue) async {
+              await _prefs.then((prefs) {
+                darkMode = newValue;
+                prefs.setBool("dark_mode", newValue);
+                setState(() {});
+              });
+            },
+          )
         ],
       ),
       body: Column(children: <Widget>[
@@ -528,27 +593,15 @@ class ControllerPage extends State<Controller> {
 }
 
 class MyAppState extends State<MyApp> {
-  StreamSubscription<String>? _setupSubscription;
-  final MidiCommand _midiCommand = MidiCommand();
-  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  final _formKey = GlobalKey<FormState>();
-
   @override
-  void initState() async {
+  void initState() {
     super.initState();
-    final SharedPreferences prefs = await _prefs;
-    globalFontSize = prefs.getInt("font_size") ?? 35;
-    darkMode = prefs.getBool("dark_mode") ?? true;
-    setState(() {});
-    _setupSubscription = _midiCommand.onMidiSetupChanged?.listen((data) async {
-      setState(() {});
-    });
-  }
+    //final List<MidiDevice>? midiDevice = await _midiCommand.devices;
+    //if (midiDevice != null) {
+    // isConnected = midiDevice[0].connected;
+    // }
 
-  @override
-  void dispose() {
-    _setupSubscription?.cancel();
-    super.dispose();
+    setState(() {});
   }
 
   IconData _deviceIconForType(String type) {
@@ -567,77 +620,8 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-          scaffoldBackgroundColor: darkMode ? Colors.black : Colors.white),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Flutter-midi-podgo'),
-          actions: [
-            Switch(
-              value: darkMode,
-              onChanged: (newValue) async {
-                setState(() {
-                  darkMode = newValue;
-                });
-                final SharedPreferences prefs = await _prefs;
-                prefs.setBool("dark_mode", newValue);
-              },
-            )
-          ],
-        ),
-        body: Center(
-          child: FutureBuilder(
-            future: _midiCommand.devices,
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              if (snapshot.hasData && snapshot.data != null) {
-                var devices = snapshot.data as List<MidiDevice>;
-                return ListView.builder(
-                  itemCount: devices.length,
-                  itemBuilder: (context, index) {
-                    MidiDevice device = devices[index];
-
-                    return ListTile(
-                      iconColor: darkMode ? Colors.white : Colors.black,
-                      title: Text(
-                        device.name,
-                        style: Theme.of(context)
-                            .textTheme
-                            .apply(
-                                bodyColor:
-                                    darkMode ? Colors.white : Colors.black)
-                            .headlineSmall,
-                      ),
-                      leading: Icon(device.connected
-                          ? Icons.radio_button_on
-                          : Icons.radio_button_off),
-                      trailing: Icon(_deviceIconForType(device.type)),
-                      onTap: () {
-                        if (device.connected) {
-                          _midiCommand.disconnectDevice(device);
-                        } else {
-                          _midiCommand.connectToDevice(device).then((_) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const Controller()),
-                            );
-                          }).catchError((err) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(
-                                    "Error: ${(err as PlatformException?)?.message}")));
-                          });
-                        }
-                      },
-                    );
-                  },
-                );
-              } else {
-                return const CircularProgressIndicator();
-              }
-            },
-          ),
-        ),
-      ),
-    );
+        theme: ThemeData(
+            scaffoldBackgroundColor: darkMode ? Colors.black : Colors.white),
+        home: const Controller());
   }
 }
